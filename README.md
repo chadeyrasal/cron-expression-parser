@@ -19,7 +19,7 @@ Each entry in the crontab corresponds to a single task and must follow a precise
 - Day of the week: from 1 to 7
 - Command to execute
 
-N.B. This scripts does not support usage of the following for input:
+N.B. This script does not support the usage of the following for input:
 
 - Month: jan, feb... abbreviations
 - Day of the week: 0 is not supported
@@ -27,6 +27,7 @@ N.B. This scripts does not support usage of the following for input:
 
 ## Running the script
 
-1. Run the script in the terminal as the following exalple: `mix run scripts/parse_cron_expression.exs "* 0 1,15 * 1-5 /usr/bin/find"`
+1. Run the script in the terminal as the following example:
+   `mix run scripts/parse_cron_expression.exs "* 0 1,15 * 1-5 /usr/bin/find"`
 
 2. See the result displayed in the terminal
