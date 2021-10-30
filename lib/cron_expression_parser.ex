@@ -66,7 +66,7 @@ defmodule CronExpressionParser do
 
   """
 
-  def process_time_field(value, time_field) do
+  def process_time_field(value, time_field) when is_binary(value) do
     cond do
       value == "*" ->
         enum_to_string(get_range(time_field)) |> to_ok_tuple()
@@ -87,6 +87,9 @@ defmodule CronExpressionParser do
         {:error, "No match found when parsing data."}
     end
   end
+
+  def process_time_field(_value, _time_field),
+    do: {:error, "The value to be processes should be a string. Please check and try again"}
 
   defp process_data(%{
          minute: minute,
