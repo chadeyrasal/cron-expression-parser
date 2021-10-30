@@ -1,21 +1,31 @@
 # CronExpressionParser
 
-**TODO: Add description**
+This cron expression parser takes in an input as single argument, and returns a table where each field is expanded to show at what time the job will run.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `cron_expression_parser` to your list of dependencies in `mix.exs`:
+1. Ensure you have elixir installed on your machine. If it is not the case, please visit https://elixir-lang.org/install.html for installation instructions
 
-```elixir
-def deps do
-  [
-    {:cron_expression_parser, "~> 0.1.0"}
-  ]
-end
-```
+2. Clone this repository: https://github.com/chadeyrasal/cron-expression-parser
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/cron_expression_parser](https://hexdocs.pm/cron_expression_parser).
+## Input format
 
+Each entry in the crontab corresponds to a single task and must follow a precise notation:
+
+- Minute: from 0 to 59
+- Hour: from 0 to 23
+- Day of the month: from 1 to 31
+- Month: from 1 to 12
+- Day of the week: from 1 to 7
+- Command to execute
+
+N.B. This scripts does not support usage of the following for input:
+
+- Month: jan, feb... abbreviations
+- Day of the week: 0 is not supported
+
+## Running the script
+
+1. Run the script in the terminal as the following exalple: `mix run scripts/parse_cron_expression.exs "* 0 1,15 * 1-5 /usr/bin/find"`
+
+2. See the result displayed in the terminal
