@@ -8,9 +8,6 @@ defmodule CronExpressionParser do
   @range_regex ~r/^[[:digit:]]{1,2}-[[:digit:]]{1,2}$/
   @steps_regex ~r/^\*\/[[:digit:]]{1,2}$/
 
-  @doc """
-  """
-
   def expression_parser([arg]) do
     [minute | [hour | [day_of_month | [month | [day_of_week | command]]]]] =
       arg_list = String.split(arg)
@@ -25,16 +22,6 @@ defmodule CronExpressionParser do
           day_of_week: day_of_week,
           command: command
         })
-
-        {:ok,
-         %{
-           minute: "0, 15, 30, 45",
-           hour: "0",
-           day_of_month: "1, 15",
-           month: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12",
-           day_of_week: "1, 2, 3, 4, 5",
-           command: "/usr/bin/find"
-         }}
 
       _ ->
         {:error,
@@ -52,6 +39,53 @@ defmodule CronExpressionParser do
 
   def expression_parser(_) do
     {:error, "There is an issue with the argument provided. Please check the argument provided."}
+  end
+
+  @doc """
+  Process time field
+
+  ## Examples
+
+      iex> CronExpressionParser.process_time_field("*/15", "minute")
+      {:ok, "0, 15, 30, 45"}
+
+      iex> CronExpressionParser.process_time_field("0", "hour")
+      {:ok, "0"}
+
+      iex> CronExpressionParser.process_time_field("1,15", "day_of_month")
+      {:ok, "1, 15"}
+
+      iex> CronExpressionParser.process_time_field("*", "month")
+      {:ok, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"}
+
+      iex> CronExpressionParser.process_time_field("1-5", "day_of_week")
+      {:ok, "1, 2, 3, 4, 5"}
+
+      iex> CronExpressionParser.process_time_field("120", "minute")
+      {:error, "No match found when parsing data."}
+
+  """
+
+  def process_time_field(value, time_field) do
+    cond do
+      value == "*" ->
+        enum_to_string(get_range(time_field)) |> to_ok_tuple()
+
+      String.match?(value, @integer_regex) ->
+        value |> to_ok_tuple()
+
+      String.match?(value, @list_regex) ->
+        String.replace(value, ",", ", ") |> to_ok_tuple()
+
+      String.match?(value, @range_regex) ->
+        format_range(value)
+
+      String.match?(value, @steps_regex) ->
+        format_steps(value, time_field)
+
+      true ->
+        {:error, "No match found when parsing data."}
+    end
   end
 
   defp process_data(%{
@@ -86,55 +120,15 @@ defmodule CronExpressionParser do
     {:error, "There is an issue with the command format. Please double check before trying again"}
   end
 
-  defp process_minute(minute) do
-    cond do
-      minute == "*" ->
-        enum_to_string(0..59) |> to_ok_tuple()
+  defp process_minute(minute), do: process_time_field(minute, "minute")
 
-      String.match?(minute, @integer_regex) ->
-        minute |> to_ok_tuple()
+  defp process_hour(hour), do: process_time_field(hour, "hour")
 
-      String.match?(minute, @list_regex) ->
-        String.replace(minute, ",", ", ") |> to_ok_tuple()
+  defp process_day_of_month(day_of_month), do: process_time_field(day_of_month, "day_of_month")
 
-      String.match?(minute, @range_regex) ->
-        format_range(minute)
+  defp process_month(month), do: process_time_field(month, "month")
 
-      String.match?(minute, @steps_regex) ->
-        format_steps(minute, "minute")
-
-      true ->
-        {:error, "No match found when parsing data."}
-    end
-  end
-
-  defp process_hour(hour) do
-    case hour do
-      "*" -> enum_to_string(0..23)
-    end
-    |> to_ok_tuple()
-  end
-
-  defp process_day_of_month(day_of_month) do
-    case day_of_month do
-      "*" -> enum_to_string(1..31)
-    end
-    |> to_ok_tuple()
-  end
-
-  defp process_month(month) do
-    case month do
-      "*" -> enum_to_string(1..12)
-    end
-    |> to_ok_tuple()
-  end
-
-  defp process_day_of_week(day_of_week) do
-    case day_of_week do
-      "*" -> enum_to_string(1..7)
-    end
-    |> to_ok_tuple()
-  end
+  defp process_day_of_week(day_of_week), do: process_time_field(day_of_week, "day_of_week")
 
   defp enum_to_string(enum) do
     Enum.join(enum, ", ")
@@ -159,6 +153,14 @@ defmodule CronExpressionParser do
   end
 
   defp get_range("minute"), do: 0..59
+
+  defp get_range("hour"), do: 0..23
+
+  defp get_range("day_of_month"), do: 1..31
+
+  defp get_range("month"), do: 1..12
+
+  defp get_range("day_of_week"), do: 1..7
 
   defp to_ok_tuple(value) do
     {:ok, value}
