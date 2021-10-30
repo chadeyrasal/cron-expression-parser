@@ -55,7 +55,7 @@ defmodule CronExpressionParser do
          day_of_month: day_of_month,
          month: month,
          day_of_week: day_of_week,
-         command: command
+         command: [command]
        })
        when is_binary(command) do
     with {:ok, formatted_minute} <- process_minute(minute),
@@ -82,27 +82,42 @@ defmodule CronExpressionParser do
   end
 
   defp process_minute(minute) do
-    IO.inspect(minute)
-
     case minute do
-      "*" -> IO.inspect(0..59)
+      "*" -> enum_to_string(0..59)
     end
+    |> to_ok_tuple()
   end
 
   defp process_hour(hour) do
-    hour
+    case hour do
+      "*" -> enum_to_string(0..23)
+    end
+    |> to_ok_tuple()
   end
 
   defp process_day_of_month(day_of_month) do
-    day_of_month
+    case day_of_month do
+      "*" -> enum_to_string(1..31)
+    end
+    |> to_ok_tuple()
   end
 
   defp process_month(month) do
-    month
+    case month do
+      "*" -> enum_to_string(1..12)
+    end
+    |> to_ok_tuple()
   end
 
   defp process_day_of_week(day_of_week) do
-    day_of_week
+    case day_of_week do
+      "*" -> enum_to_string(1..7)
+    end
+    |> to_ok_tuple()
+  end
+
+  defp enum_to_string(enum) do
+    Enum.join(enum, ", ")
   end
 
   defp to_ok_tuple(value) do
