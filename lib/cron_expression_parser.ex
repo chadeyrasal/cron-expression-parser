@@ -3,6 +3,11 @@ defmodule CronExpressionParser do
   Documentation for `CronExpressionParser`.
   """
 
+  @integer_regex ~r/^[[:digit:]]{1,2}$/
+  @list_regex ~r/^[[:digit:]]{1,2},[[:digit:]]{1,2}$/
+  @range_regex ~r/^[[:digit:]]{1,2}-[[:digit:]]{1,2}$/
+  @steps_regex ~r/^\*\/[[:digit:]]{1,2}$/
+
   @doc """
   """
 
@@ -82,10 +87,25 @@ defmodule CronExpressionParser do
   end
 
   defp process_minute(minute) do
-    case minute do
-      "*" -> enum_to_string(0..59)
+    cond do
+      minute == "*" ->
+        enum_to_string(0..59) |> to_ok_tuple()
+
+      String.match?(minute, @integer_regex) ->
+        minute |> to_ok_tuple()
+
+      String.match?(minute, @list_regex) ->
+        String.replace(minute, ",", ", ") |> to_ok_tuple()
+
+      String.match?(minute, @range_regex) ->
+        format_range(minute)
+
+      String.match?(minute, @steps_regex) ->
+        format_steps(minute, "minute")
+
+      true ->
+        {:error, "No match found when parsing data."}
     end
-    |> to_ok_tuple()
   end
 
   defp process_hour(hour) do
@@ -119,6 +139,26 @@ defmodule CronExpressionParser do
   defp enum_to_string(enum) do
     Enum.join(enum, ", ")
   end
+
+  defp format_range(range) do
+    [min, max] =
+      range
+      |> String.split("-")
+      |> Enum.map(&String.to_integer(&1))
+
+    enum_to_string(min..max) |> to_ok_tuple()
+  end
+
+  defp format_steps(steps, time_field) do
+    [_asterisk | [_slash | digits]] = String.split(steps, "", trim: true)
+    divisor = Enum.join(digits) |> String.to_integer()
+
+    Enum.filter(get_range(time_field), fn digit -> rem(digit, divisor) == 0 end)
+    |> enum_to_string()
+    |> to_ok_tuple()
+  end
+
+  defp get_range("minute"), do: 0..59
 
   defp to_ok_tuple(value) do
     {:ok, value}
