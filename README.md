@@ -23,6 +23,7 @@ N.B. This scripts does not support usage of the following for input:
 
 - Month: jan, feb... abbreviations
 - Day of the week: 0 is not supported
+- Nonstandard predefined scheduling definitions
 
 ## Running the script
 
