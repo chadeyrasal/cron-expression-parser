@@ -75,7 +75,7 @@ defmodule CronExpressionParser do
         value |> to_ok_tuple()
 
       String.match?(value, @list_regex) ->
-        String.replace(value, ",", ", ") |> to_ok_tuple()
+        String.replace(value, ",", " ") |> to_ok_tuple()
 
       String.match?(value, @range_regex) ->
         format_range(value)
@@ -134,7 +134,7 @@ defmodule CronExpressionParser do
   defp process_day_of_week(day_of_week), do: process_time_field(day_of_week, "day_of_week")
 
   defp enum_to_string(enum) do
-    Enum.join(enum, ", ")
+    Enum.join(enum, " ")
   end
 
   defp format_range(range) do
