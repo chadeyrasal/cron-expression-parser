@@ -7,11 +7,11 @@ defmodule CronExpressionParserTest do
       {:ok, result} = CronExpressionParser.expression_parser(["*/15 0 1,15 * 1-5 /usr/bin/find"])
 
       assert result == %{
-               minute: "0, 15, 30, 45",
+               minute: "0 15 30 45",
                hour: "0",
-               day_of_month: "1, 15",
-               month: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12",
-               day_of_week: "1, 2, 3, 4, 5",
+               day_of_month: "1 15",
+               month: "1 2 3 4 5 6 7 8 9 10 11 12",
+               day_of_week: "1 2 3 4 5",
                command: "/usr/bin/find"
              }
     end

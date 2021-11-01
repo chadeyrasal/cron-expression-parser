@@ -1,6 +1,9 @@
 defmodule CronExpressionParser do
   @moduledoc """
-  Documentation for `CronExpressionParser`.
+  Documentation for `CronExpressionParser`. This module handles the logic for expanding each part
+  of a standard cron string intodetails expressions for each time field and the command to be run.
+  The printing of the result is handled in the script itself, which can be found at
+  `scripts/cron_expression_parser.exs`
   """
 
   @integer_regex ~r/^[[:digit:]]{1,2}$/
@@ -9,24 +12,16 @@ defmodule CronExpressionParser do
   @steps_regex ~r/^\*\/[[:digit:]]{1,2}$/
 
   def expression_parser([arg]) do
-    [minute | [hour | [day_of_month | [month | [day_of_week | command]]]]] =
-      arg_list = String.split(arg)
+    [minute | [hour | [day_of_month | [month | [day_of_week | [command]]]]]] = String.split(arg)
 
-    case length(arg_list) do
-      6 ->
-        process_data(%{
-          minute: minute,
-          hour: hour,
-          day_of_month: day_of_month,
-          month: month,
-          day_of_week: day_of_week,
-          command: command
-        })
-
-      _ ->
-        {:error,
-         "There is an unexpected number of elements in the argument provided. Please double check the argument before trying again."}
-    end
+    process_data(%{
+      minute: minute,
+      hour: hour,
+      day_of_month: day_of_month,
+      month: month,
+      day_of_week: day_of_week,
+      command: command
+    })
   end
 
   def expression_parser([]) do
@@ -47,19 +42,19 @@ defmodule CronExpressionParser do
   ## Examples
 
       iex> CronExpressionParser.process_time_field("*/15", "minute")
-      {:ok, "0, 15, 30, 45"}
+      {:ok, "0 15 30 45"}
 
       iex> CronExpressionParser.process_time_field("0", "hour")
       {:ok, "0"}
 
       iex> CronExpressionParser.process_time_field("1,15", "day_of_month")
-      {:ok, "1, 15"}
+      {:ok, "1 15"}
 
       iex> CronExpressionParser.process_time_field("*", "month")
-      {:ok, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"}
+      {:ok, "1 2 3 4 5 6 7 8 9 10 11 12"}
 
       iex> CronExpressionParser.process_time_field("1-5", "day_of_week")
-      {:ok, "1, 2, 3, 4, 5"}
+      {:ok, "1 2 3 4 5"}
 
       iex> CronExpressionParser.process_time_field("120", "minute")
       {:error, "No match found when parsing data."}
@@ -97,7 +92,7 @@ defmodule CronExpressionParser do
          day_of_month: day_of_month,
          month: month,
          day_of_week: day_of_week,
-         command: [command]
+         command: command
        })
        when is_binary(command) do
     with {:ok, formatted_minute} <- process_minute(minute),
