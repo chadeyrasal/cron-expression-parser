@@ -23,11 +23,11 @@ N.B. This script does not support the usage of the following for input:
 
 - Month: jan, feb... abbreviations
 - Day of the week: 0 is not supported
-- Nonstandard predefined scheduling definitions
+- Nonstandard predefined scheduling definitions like `@yearly`
 
 ## Running the script
 
 1. Run the script in the terminal as the following example:
-   `mix run scripts/parse_cron_expression.exs "* 0 1,15 * 1-5 /usr/bin/find"`
+   `mix run scripts/parse_cron_expression.exs "*/15 0 1,15 * 1-5 /usr/bin/find"`
 
 2. See the result displayed in the terminal
